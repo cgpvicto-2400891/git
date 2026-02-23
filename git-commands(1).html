@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Commands — Référence Complète</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── DARK THEME ─────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:           #0e1117;
+  --surface:      #161b27;
+  --card:         #1c2333;
+  --card-hover:   #212840;
+  --border:       #2a3348;
+  --border-soft:  #1e2a3d;
+  --accent:       #f7c948;
+  --green:        #3dd68c;
+  --blue:         #79b8ff;
+  --purple:       #c9b1fd;
+  --red:          #ff7b72;
+  --orange:       #ffa657;
+  --text:         #f0f3f8;
+  --text-body:    #cdd5e0;
+  --text-sub:     #8b96a7;
+  --text-muted:   #586069;
+  --code-bg:      #0d1117;
+  --code-text:    #e6edf3;
+  --output-bg:    #0f2818;
+  --output-text:  #3dd68c;
+  --output-border:#1a3d2e;
+  --comment-col:  #6e9a6e;
+  --shadow:       0 4px 24px rgba(0,0,0,0.5);
+  --shadow-h:     0 8px 32px rgba(0,0,0,0.65);
+}
+
+/* ── LIGHT THEME ────────────────────────────────── */
+[data-theme="light"] {
+  --bg:           #f4f6f9;
+  --surface:      #ffffff;
+  --card:         #ffffff;
+  --card-hover:   #f0f4ff;
+  --border:       #d0d7de;
+  --border-soft:  #eaecef;
+  --accent:       #9a6f00;
+  --green:        #1a7f37;
+  --blue:         #0550ae;
+  --purple:       #6639ba;
+  --red:          #cf222e;
+  --orange:       #bc4c00;
+  --text:         #1a1f2b;
+  --text-body:    #2d333b;
+  --text-sub:     #57606a;
+  --text-muted:   #8c959f;
+  --code-bg:      #f6f8fa;
+  --code-text:    #24292f;
+  --output-bg:    #dafbe1;
+  --output-text:  #116329;
+  --output-border:#b3e8c0;
+  --comment-col:  #5c7a5c;
+  --shadow:       0 2px 12px rgba(0,0,0,0.08);
+  --shadow-h:     0 6px 24px rgba(0,0,0,0.14);
+}
+
+/* ── RESET ────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background 0.25s, color 0.25s;
+}
+
+/* ── TOPBAR ───────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  gap: 20px;
+  box-shadow: var(--shadow);
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 15px;
+  color: #0e1117;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+/* SEARCH IN TOPBAR */
+.topbar-search {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+}
+
+.search-svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  padding: 9px 14px 9px 38px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(247,201,72,0.15);
+}
+
+[data-theme="light"] #search:focus {
+  box-shadow: 0 0 0 3px rgba(154,111,0,0.12);
+}
+
+#search::placeholder { color: var(--text-muted); }
+
+/* AUTOCOMPLETE */
+.autocomplete-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  z-index: 200;
+  display: none;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+  overflow: hidden;
+  transition: background 0.25s;
+}
+
+[data-theme="light"] .autocomplete-list {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+
+.autocomplete-list.visible { display: block; }
+
+.ac-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.12s;
+}
+
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.active { background: var(--card-hover); }
+
+.ac-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ac-cmd {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 135px;
+}
+
+.ac-desc {
+  color: var(--text-sub);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.ac-category {
+  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.ac-footer {
+  padding: 7px 14px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg);
+  display: flex;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.kbd {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+/* THEME TOGGLE */
+.theme-toggle {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--text-sub);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+/* ── HERO ─────────────────────────────────────── */
+.hero {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 48px 40px 32px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(247,201,72,0.1);
+  border: 1px solid rgba(247,201,72,0.22);
+  color: var(--accent);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 5px 13px;
+  border-radius: 20px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+[data-theme="light"] .hero-pill {
+  background: rgba(154,111,0,0.08);
+  border-color: rgba(154,111,0,0.2);
+}
+
+.hero h1 {
+  font-size: clamp(30px, 4vw, 54px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero p {
+  font-size: 15.5px;
+  color: var(--text-sub);
+  max-width: 520px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+/* ── TOOLBAR ─────────────────────────────────── */
+.toolbar {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--text-sub);
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.filter-btn:hover {
+  color: var(--text);
+  background: var(--card-hover);
+  border-color: var(--text-sub);
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0e1117;
+  font-weight: 700;
+}
+
+.stats {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.stats b {
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+/* ── GRID ─────────────────────────────────────── */
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 4px 40px 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(540px, 1fr));
+  gap: 16px;
+}
+
+/* ── CARD ─────────────────────────────────────── */
+.cmd-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s, background 0.25s;
+  animation: fadeUp 0.35s ease both;
+  box-shadow: var(--shadow);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cmd-card:hover {
+  border-color: var(--cat-color, #f7c948);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-h);
+  background: var(--card-hover);
+}
+
+/* Card Header */
+.cmd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px 13px;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(0,0,0,0.07);
+  gap: 10px;
+}
+
+[data-theme="light"] .cmd-header {
+  background: var(--bg);
+}
+
+.cmd-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--accent);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  flex-wrap: wrap;
+}
+
+.git-prefix {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.cmd-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+/* Card Body */
+.cmd-body {
+  padding: 16px 20px 20px;
+}
+
+.cmd-description {
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+
+.cmd-description code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--blue);
+}
+
+.examples-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.examples-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-soft);
+}
+
+/* Example block */
+.example-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cat-color, #f7c948);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.example-block:last-child { margin-bottom: 0; }
+
+.example-comment {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--comment-col);
+  margin-bottom: 7px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.example-code {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--code-text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.75;
+}
+
+/* Syntax tokens */
+.example-code .flag           { color: var(--blue); }
+.example-code .arg            { color: var(--purple); }
+.example-code .comment-inline { color: var(--comment-col); font-style: italic; }
+
+/* Output */
+.output-block {
+  background: var(--output-bg);
+  border: 1px solid var(--output-border);
+  border-radius: 6px;
+  padding: 9px 13px;
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--output-text);
+  line-height: 1.75;
+}
+
+.output-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  opacity: 0.55;
+}
+
+/* Highlight search match */
+mark {
+  background: rgba(247,201,72,0.22);
+  color: var(--accent);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+[data-theme="light"] mark {
+  background: rgba(154,111,0,0.14);
+}
+
+/* ── NO RESULTS ───────────────────────────────── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  display: none;
+}
+
+.no-results.visible { display: block; }
+.no-results-emoji { font-size: 44px; margin-bottom: 14px; }
+
+.no-results h3 {
+  font-size: 19px;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.no-results p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── SCROLLBAR ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── RESPONSIVE ───────────────────────────────── */
+@media (max-width: 800px) {
+  .topbar { padding: 0 16px; }
+  .hero, .toolbar, main { padding-left: 16px; padding-right: 16px; }
+  main { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 28px; }
+  .brand-name { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">G</div>
+    <span class="brand-name">Git Docs FR</span>
+  </div>
+
+  <div class="topbar-search">
+    <svg class="search-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="search" placeholder="Chercher une commande… commit, merge, stash…" autocomplete="off" spellcheck="false">
+    <div class="autocomplete-list" id="autocomplete"></div>
+  </div>
+
+  <button class="theme-toggle" id="themeBtn" title="Basculer mode sombre / clair">🌙</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-pill">📖 Documentation Git — Français</div>
+  <h1>Toutes les commandes<br><em>Git</em> expliquées</h1>
+  <p>Référence complète avec exemples concrets, cas d'usage réels et sorties attendues pour chaque commande.</p>
+</section>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Toutes</button>
+    <button class="filter-btn" data-filter="base">🟡 Base</button>
+    <button class="filter-btn" data-filter="branch">🔵 Branches</button>
+    <button class="filter-btn" data-filter="remote">🟠 Remote</button>
+    <button class="filter-btn" data-filter="history">🟣 Historique</button>
+    <button class="filter-btn" data-filter="undo">🔴 Annuler</button>
+    <button class="filter-btn" data-filter="advanced">🟢 Avancé</button>
+    <button class="filter-btn" data-filter="config">🟤 Config</button>
+  </div>
+  <div class="stats"><b id="count">0</b> commande(s) affichée(s)</div>
+</div>
+
+<!-- GRID -->
+<main id="grid">
+  <div class="no-results" id="no-results">
+    <div class="no-results-emoji">🔍</div>
+    <h3>Aucune commande trouvée</h3>
+    <p>Essayez un autre terme de recherche</p>
+  </div>
+</main>
+
+<script>
+const commands = [
+  // ── BASE ──────────────────────────────────────
+  {
+    cmd: 'git init', category: 'base',
+    desc: 'Initialise un nouveau dépôt Git dans le répertoire courant. Crée un dossier <code>.git</code> caché contenant tout l\'historique.',
+    examples: [
+      { comment: 'Initialiser dans le dossier courant', code: 'git init', output: 'Initialized empty Git repository in /monprojet/.git/' },
+      { comment: 'Initialiser un nouveau dossier nommé', code: 'git init <span class="arg">mon-projet</span>' },
+    ]
+  },
+  {
+    cmd: 'git clone', category: 'base',
+    desc: 'Clone un dépôt distant en local. Télécharge tout l\'historique, toutes les branches et tous les fichiers.',
+    examples: [
+      { comment: 'Cloner depuis GitHub via HTTPS', code: 'git clone <span class="arg">https://github.com/user/repo.git</span>' },
+      { comment: 'Cloner dans un dossier personnalisé', code: 'git clone <span class="arg">https://github.com/user/repo.git</span> <span class="arg">mon-dossier</span>' },
+      { comment: 'Cloner uniquement une branche précise', code: 'git clone <span class="flag">--branch</span> <span class="arg">develop</span> <span class="arg">https://github.com/user/repo.git</span>' },
+    ]
+  },
+  {
+    cmd: 'git add', category: 'base',
+    desc: 'Ajoute des fichiers à la zone de staging (l\'index) pour préparer le prochain commit.',
+    examples: [
+      { comment: 'Ajouter un fichier précis', code: 'git add <span class="arg">index.html</span>' },
+      { comment: 'Ajouter tous les fichiers modifiés et nouveaux', code: 'git add <span class="flag">.</span>' },
+      { comment: 'Mode interactif — choisir morceau par morceau', code: 'git add <span class="flag">-p</span>' },
+      { comment: 'Ajouter tous les fichiers .js du projet', code: 'git add <span class="arg">*.js</span>' },
+    ]
+  },
+  {
+    cmd: 'git commit', category: 'base',
+    desc: 'Enregistre les changements stagés dans l\'historique avec un message descriptif. Chaque commit est un instantané du projet.',
+    examples: [
+      { comment: 'Commit standard avec message', code: 'git commit <span class="flag">-m</span> <span class="arg">"feat: ajout page contact"</span>' },
+      { comment: 'Ajouter ET commiter en une seule commande', code: 'git commit <span class="flag">-am</span> <span class="arg">"fix: correction bug login"</span>' },
+      { comment: 'Modifier le message du dernier commit', code: 'git commit <span class="flag">--amend -m</span> <span class="arg">"message corrigé"</span>' },
+    ]
+  },
+  {
+    cmd: 'git status', category: 'base',
+    desc: 'Affiche l\'état du répertoire de travail : quels fichiers sont modifiés, stagés ou non trackés.',
+    examples: [
+      { comment: 'Vue complète et explicite', code: 'git status', output: 'On branch main\nChanges to be committed:\n  modified:   index.html\nUntracked files:\n  style.css' },
+      { comment: 'Format court et compact', code: 'git status <span class="flag">-s</span>', output: 'M  index.html\n?? style.css' },
+    ]
+  },
+  {
+    cmd: 'git diff', category: 'base',
+    desc: 'Affiche les différences ligne par ligne entre les fichiers modifiés, l\'index et les commits.',
+    examples: [
+      { comment: 'Modifications non stagées (working tree)', code: 'git diff' },
+      { comment: 'Modifications stagées avant commit', code: 'git diff <span class="flag">--staged</span>' },
+      { comment: 'Comparer deux branches', code: 'git diff <span class="arg">main</span><span class="flag">..</span><span class="arg">feature/login</span>' },
+      { comment: 'Diff d\'un fichier spécifique', code: 'git diff <span class="arg">src/app.js</span>' },
+    ]
+  },
+  // ── BRANCH ──────────────────────────────────
+  {
+    cmd: 'git branch', category: 'branch',
+    desc: 'Liste, crée, renomme ou supprime des branches locales et distantes.',
+    examples: [
+      { comment: 'Lister toutes les branches locales', code: 'git branch', output: '* main\n  feature/login\n  develop' },
+      { comment: 'Créer une nouvelle branche (sans basculer)', code: 'git branch <span class="arg">feature/nouveau-design</span>' },
+      { comment: 'Supprimer une branche fusionnée', code: 'git branch <span class="flag">-d</span> <span class="arg">feature/login</span>' },
+      { comment: 'Forcer la suppression (non fusionnée)', code: 'git branch <span class="flag">-D</span> <span class="arg">feature/abandonnee</span>' },
+      { comment: 'Renommer la branche courante', code: 'git branch <span class="flag">-m</span> <span class="arg">ancien-nom</span> <span class="arg">nouveau-nom</span>' },
+    ]
+  },
+  {
+    cmd: 'git checkout', category: 'branch',
+    desc: 'Change de branche, crée une branche ou restaure des fichiers. Commande historique polyvalente de Git.',
+    examples: [
+      { comment: 'Changer vers une branche existante', code: 'git checkout <span class="arg">develop</span>' },
+      { comment: 'Créer ET basculer sur une nouvelle branche', code: 'git checkout <span class="flag">-b</span> <span class="arg">feature/paiement</span>' },
+      { comment: 'Restaurer un fichier à son dernier état commité', code: 'git checkout <span class="flag">--</span> <span class="arg">index.html</span>' },
+      { comment: 'Se placer sur un commit précis (detached HEAD)', code: 'git checkout <span class="arg">a3f8c21</span>' },
+    ]
+  },
+  {
+    cmd: 'git switch', category: 'branch',
+    desc: 'Commande moderne (Git 2.23+) dédiée uniquement au changement de branche. Plus lisible que checkout.',
+    examples: [
+      { comment: 'Basculer sur une branche existante', code: 'git switch <span class="arg">develop</span>' },
+      { comment: 'Créer ET basculer sur une nouvelle branche', code: 'git switch <span class="flag">-c</span> <span class="arg">feature/api</span>' },
+      { comment: 'Revenir à la branche précédente', code: 'git switch <span class="flag">-</span>' },
+    ]
+  },
+  {
+    cmd: 'git merge', category: 'branch',
+    desc: 'Fusionne une branche dans la branche courante. Crée un commit de merge si les historiques ont divergé.',
+    examples: [
+      { comment: 'Fusionner feature/login dans la branche courante', code: 'git merge <span class="arg">feature/login</span>' },
+      { comment: 'Forcer un commit de merge (pas de fast-forward)', code: 'git merge <span class="flag">--no-ff</span> <span class="arg">feature/login</span>' },
+      { comment: 'Annuler un merge en cours de conflit', code: 'git merge <span class="flag">--abort</span>' },
+    ]
+  },
+  {
+    cmd: 'git rebase', category: 'branch',
+    desc: 'Réapplique des commits sur une autre base pour obtenir un historique linéaire et plus propre.',
+    examples: [
+      { comment: 'Rebaser la branche courante sur main', code: 'git rebase <span class="arg">main</span>' },
+      { comment: 'Rebase interactif — modifier, squash, reorder', code: 'git rebase <span class="flag">-i</span> <span class="arg">HEAD~3</span>' },
+      { comment: 'Annuler le rebase en cours', code: 'git rebase <span class="flag">--abort</span>' },
+      { comment: 'Continuer après résolution de conflit', code: 'git rebase <span class="flag">--continue</span>' },
+    ]
+  },
+  {
+    cmd: 'git cherry-pick', category: 'branch',
+    desc: 'Applique les modifications d\'un commit précis sur la branche courante, sans fusionner toute la branche.',
+    examples: [
+      { comment: 'Appliquer un commit par son hash', code: 'git cherry-pick <span class="arg">a3f8c21</span>' },
+      { comment: 'Appliquer plusieurs commits à la suite', code: 'git cherry-pick <span class="arg">a3f8c21</span> <span class="arg">b4d9e30</span>' },
+      { comment: 'Appliquer sans auto-commit pour vérifier avant', code: 'git cherry-pick <span class="flag">--no-commit</span> <span class="arg">a3f8c21</span>' },
+    ]
+  },
+  // ── REMOTE ──────────────────────────────────
+  {
+    cmd: 'git remote', category: 'remote',
+    desc: 'Gère les connexions vers des dépôts distants (origin, upstream, fork, etc.).',
+    examples: [
+      { comment: 'Lister tous les remotes avec leurs URLs', code: 'git remote <span class="flag">-v</span>', output: 'origin  https://github.com/user/repo.git (fetch)\norigin  https://github.com/user/repo.git (push)' },
+      { comment: 'Ajouter un nouveau remote', code: 'git remote add <span class="arg">origin</span> <span class="arg">https://github.com/user/repo.git</span>' },
+      { comment: 'Supprimer un remote', code: 'git remote remove <span class="arg">origin</span>' },
+      { comment: 'Modifier l\'URL d\'un remote existant', code: 'git remote set-url <span class="arg">origin</span> <span class="arg">https://github.com/newuser/repo.git</span>' },
+    ]
+  },
+  {
+    cmd: 'git fetch', category: 'remote',
+    desc: 'Télécharge les changements du dépôt distant dans votre dépôt local sans les fusionner.',
+    examples: [
+      { comment: 'Récupérer toutes les mises à jour de origin', code: 'git fetch <span class="arg">origin</span>' },
+      { comment: 'Récupérer depuis tous les remotes', code: 'git fetch <span class="flag">--all</span>' },
+      { comment: 'Nettoyer les branches distantes supprimées', code: 'git fetch <span class="flag">--prune</span>' },
+    ]
+  },
+  {
+    cmd: 'git pull', category: 'remote',
+    desc: 'Raccourci pour fetch + merge : récupère ET intègre immédiatement les changements du dépôt distant.',
+    examples: [
+      { comment: 'Tirer les changements de origin/main', code: 'git pull <span class="arg">origin</span> <span class="arg">main</span>' },
+      { comment: 'Pull avec rebase pour un historique plus propre', code: 'git pull <span class="flag">--rebase</span> <span class="arg">origin</span> <span class="arg">main</span>' },
+      { comment: 'Récupérer toutes les branches distantes', code: 'git pull <span class="flag">--all</span>' },
+    ]
+  },
+  {
+    cmd: 'git push', category: 'remote',
+    desc: 'Envoie les commits locaux vers le dépôt distant pour les partager avec l\'équipe.',
+    examples: [
+      { comment: 'Pousser la branche main vers origin', code: 'git push <span class="arg">origin</span> <span class="arg">main</span>' },
+      { comment: 'Définir l\'upstream et pousser en une fois', code: 'git push <span class="flag">-u</span> <span class="arg">origin</span> <span class="arg">feature/login</span>' },
+      { comment: 'Push forcé sécurisé (recommandé sur --force)', code: 'git push <span class="flag">--force-with-lease</span>' },
+      { comment: 'Pousser tous les tags locaux', code: 'git push <span class="flag">--tags</span>' },
+    ]
+  },
+  // ── HISTORY ─────────────────────────────────
+  {
+    cmd: 'git log', category: 'history',
+    desc: 'Parcourt et affiche l\'historique complet des commits avec de nombreuses options de filtrage.',
+    examples: [
+      { comment: 'Historique complet avec tous les détails', code: 'git log', output: 'commit a3f8c21\nAuthor: Jean Dupont <jean@mail.com>\nDate:   Mon Feb 23 2026\n\n    feat: ajout page contact' },
+      { comment: 'Format compact — une ligne par commit', code: 'git log <span class="flag">--oneline</span>', output: 'a3f8c21 feat: ajout page contact\nb4d9e30 fix: correction bug login' },
+      { comment: 'Graphe visuel de toutes les branches', code: 'git log <span class="flag">--oneline --graph --all</span>' },
+      { comment: 'Filtrer par auteur', code: 'git log <span class="flag">--author=</span><span class="arg">"Jean"</span>' },
+      { comment: 'Filtrer depuis une date précise', code: 'git log <span class="flag">--since=</span><span class="arg">"2025-01-01"</span>' },
+    ]
+  },
+  {
+    cmd: 'git show', category: 'history',
+    desc: 'Affiche les détails complets d\'un commit : auteur, date, message et diff des fichiers modifiés.',
+    examples: [
+      { comment: 'Voir le dernier commit en détail', code: 'git show' },
+      { comment: 'Voir un commit spécifique par son hash', code: 'git show <span class="arg">a3f8c21</span>' },
+      { comment: 'Résumé des fichiers modifiés uniquement', code: 'git show <span class="flag">--stat</span> <span class="arg">a3f8c21</span>' },
+    ]
+  },
+  {
+    cmd: 'git blame', category: 'history',
+    desc: 'Affiche, pour chaque ligne d\'un fichier, qui l\'a écrite et dans quel commit.',
+    examples: [
+      { comment: 'Voir l\'auteur de chaque ligne', code: 'git blame <span class="arg">src/app.js</span>', output: 'a3f8c21 (Jean 2024-01-15) const app = express();' },
+      { comment: 'Restreindre aux lignes 10 à 25', code: 'git blame <span class="flag">-L 10,25</span> <span class="arg">src/app.js</span>' },
+    ]
+  },
+  {
+    cmd: 'git bisect', category: 'history',
+    desc: 'Utilise la recherche binaire pour identifier précisément le commit qui a introduit un bug.',
+    examples: [
+      { comment: 'Démarrer la session de débogage', code: 'git bisect start' },
+      { comment: 'Marquer le commit actuel comme buggé', code: 'git bisect bad' },
+      { comment: 'Marquer un ancien commit comme fonctionnel', code: 'git bisect good <span class="arg">v1.0.0</span>' },
+      { comment: 'Terminer et revenir à l\'état d\'origine', code: 'git bisect reset' },
+    ]
+  },
+  {
+    cmd: 'git tag', category: 'history',
+    desc: 'Crée des étiquettes permanentes pour marquer des versions importantes (releases, jalons).',
+    examples: [
+      { comment: 'Lister tous les tags existants', code: 'git tag', output: 'v1.0.0\nv1.1.0\nv2.0.0' },
+      { comment: 'Créer un tag annoté avec message', code: 'git tag <span class="flag">-a</span> <span class="arg">v2.0.0</span> <span class="flag">-m</span> <span class="arg">"Version 2.0 — Refonte UI"</span>' },
+      { comment: 'Tagger un commit passé', code: 'git tag <span class="arg">v1.5.0</span> <span class="arg">a3f8c21</span>' },
+      { comment: 'Supprimer un tag local', code: 'git tag <span class="flag">-d</span> <span class="arg">v1.0.0</span>' },
+    ]
+  },
+  // ── UNDO ────────────────────────────────────
+  {
+    cmd: 'git reset', category: 'undo',
+    desc: 'Déplace le pointeur HEAD en arrière. Trois modes selon ce qu\'on veut conserver : staged, working tree.',
+    examples: [
+      { comment: 'Déstagér un fichier (garder les modifications)', code: 'git reset <span class="arg">HEAD index.html</span>' },
+      { comment: '--soft : annule le commit, garde tout stagé', code: 'git reset <span class="flag">--soft</span> <span class="arg">HEAD~1</span>' },
+      { comment: '--mixed : annule commit + déstage (défaut)', code: 'git reset <span class="flag">--mixed</span> <span class="arg">HEAD~1</span>' },
+      { comment: '⚠️ --hard : supprime tout sans récupération', code: 'git reset <span class="flag">--hard</span> <span class="arg">HEAD~1</span>' },
+    ]
+  },
+  {
+    cmd: 'git revert', category: 'undo',
+    desc: 'Crée un nouveau commit qui inverse les changements d\'un commit passé. Sûr pour les branches partagées.',
+    examples: [
+      { comment: 'Inverser le dernier commit proprement', code: 'git revert <span class="arg">HEAD</span>' },
+      { comment: 'Inverser un commit précis par son hash', code: 'git revert <span class="arg">a3f8c21</span>' },
+      { comment: 'Inverser sans ouvrir l\'éditeur', code: 'git revert <span class="flag">--no-edit</span> <span class="arg">HEAD</span>' },
+    ]
+  },
+  {
+    cmd: 'git restore', category: 'undo',
+    desc: 'Commande moderne (Git 2.23+) pour restaurer des fichiers dans l\'arbre de travail ou l\'index.',
+    examples: [
+      { comment: 'Annuler les modifications d\'un fichier', code: 'git restore <span class="arg">index.html</span>' },
+      { comment: 'Déstagér un fichier (garder les modifications)', code: 'git restore <span class="flag">--staged</span> <span class="arg">index.html</span>' },
+      { comment: 'Restaurer la version d\'un fichier il y a 2 commits', code: 'git restore <span class="flag">--source=</span><span class="arg">HEAD~2</span> <span class="arg">index.html</span>' },
+    ]
+  },
+  {
+    cmd: 'git stash', category: 'undo',
+    desc: 'Sauvegarde temporairement les modifications non commitées pour pouvoir travailler sur autre chose.',
+    examples: [
+      { comment: 'Sauvegarder les modifications courantes', code: 'git stash' },
+      { comment: 'Stash avec un nom descriptif', code: 'git stash push <span class="flag">-m</span> <span class="arg">"WIP: page de paiement"</span>' },
+      { comment: 'Voir tous les stash sauvegardés', code: 'git stash list', output: 'stash@{0}: On main: WIP: page de paiement\nstash@{1}: WIP on develop' },
+      { comment: 'Restaurer et supprimer le dernier stash', code: 'git stash pop' },
+      { comment: 'Appliquer un stash sans le supprimer', code: 'git stash apply <span class="arg">stash@{1}</span>' },
+      { comment: 'Supprimer un stash spécifique', code: 'git stash drop <span class="arg">stash@{0}</span>' },
+    ]
+  },
+  // ── ADVANCED ────────────────────────────────
+  {
+    cmd: 'git reflog', category: 'advanced',
+    desc: 'Journal de toutes les actions effectuées sur HEAD. Permet de récupérer des commits apparemment "perdus" après un reset.',
+    examples: [
+      { comment: 'Voir tout l\'historique des déplacements de HEAD', code: 'git reflog', output: 'a3f8c21 HEAD@{0}: commit: feat: nouvelle feature\nb4d9e30 HEAD@{1}: reset: moving to HEAD~1\nc5e1f40 HEAD@{2}: checkout: moving from develop to main' },
+      { comment: 'Récupérer après un reset --hard accidentel', code: 'git checkout <span class="arg">HEAD@{2}</span>' },
+    ]
+  },
+  {
+    cmd: 'git clean', category: 'advanced',
+    desc: 'Supprime définitivement les fichiers non trackés du répertoire de travail.',
+    examples: [
+      { comment: 'Voir ce qui serait supprimé (dry-run — sans risque)', code: 'git clean <span class="flag">-n</span>' },
+      { comment: 'Supprimer les fichiers non trackés', code: 'git clean <span class="flag">-f</span>' },
+      { comment: 'Supprimer fichiers ET dossiers non trackés', code: 'git clean <span class="flag">-fd</span>' },
+      { comment: 'Tout supprimer, y compris les fichiers .gitignore', code: 'git clean <span class="flag">-fdx</span>' },
+    ]
+  },
+  {
+    cmd: 'git submodule', category: 'advanced',
+    desc: 'Gère des dépôts Git imbriqués dans un projet principal, utile pour les dépendances versionnées.',
+    examples: [
+      { comment: 'Ajouter un dépôt externe comme sous-module', code: 'git submodule add <span class="arg">https://github.com/user/lib.git</span> <span class="arg">libs/monlib</span>' },
+      { comment: 'Initialiser les sous-modules après clone', code: 'git submodule update <span class="flag">--init --recursive</span>' },
+      { comment: 'Mettre à jour tous les sous-modules', code: 'git submodule update <span class="flag">--remote</span>' },
+    ]
+  },
+  {
+    cmd: 'git worktree', category: 'advanced',
+    desc: 'Permet de travailler sur plusieurs branches simultanément dans des répertoires distincts.',
+    examples: [
+      { comment: 'Créer un worktree pour un hotfix urgent', code: 'git worktree add <span class="arg">../hotfix</span> <span class="arg">hotfix/urgent</span>' },
+      { comment: 'Lister tous les worktrees actifs', code: 'git worktree list' },
+      { comment: 'Supprimer un worktree terminé', code: 'git worktree remove <span class="arg">../hotfix</span>' },
+    ]
+  },
+  {
+    cmd: 'git archive', category: 'advanced',
+    desc: 'Exporte le contenu d\'un dépôt ou d\'une branche en archive zip ou tar.gz, sans le dossier .git.',
+    examples: [
+      { comment: 'Créer un .zip de la branche main', code: 'git archive <span class="flag">--format=zip --output=</span><span class="arg">release.zip</span> <span class="arg">main</span>' },
+      { comment: 'Créer un tar.gz depuis HEAD', code: 'git archive <span class="arg">HEAD</span> | gzip > <span class="arg">archive.tar.gz</span>' },
+    ]
+  },
+  {
+    cmd: 'git grep', category: 'advanced',
+    desc: 'Recherche une chaîne de texte dans tous les fichiers trackés du dépôt, plus rapide que grep classique.',
+    examples: [
+      { comment: 'Chercher dans tous les fichiers trackés', code: 'git grep <span class="arg">"console.log"</span>' },
+      { comment: 'Afficher les numéros de ligne', code: 'git grep <span class="flag">-n</span> <span class="arg">"TODO"</span>' },
+      { comment: 'Chercher dans une branche spécifique', code: 'git grep <span class="arg">"api_key"</span> <span class="arg">develop</span>' },
+    ]
+  },
+  {
+    cmd: 'git shortlog', category: 'advanced',
+    desc: 'Résume l\'historique des commits groupés par auteur. Pratique pour générer des changelogs.',
+    examples: [
+      { comment: 'Résumé par auteur avec leurs commits', code: 'git shortlog', output: 'Jean Dupont (12):\n    feat: page contact\n    fix: bug login\n\nMarie Martin (8):' },
+      { comment: 'Juste le nombre de commits par auteur', code: 'git shortlog <span class="flag">-sn</span>', output: '    12  Jean Dupont\n     8  Marie Martin' },
+    ]
+  },
+  // ── CONFIG ──────────────────────────────────
+  {
+    cmd: 'git config', category: 'config',
+    desc: 'Configure Git : votre identité, l\'éditeur, des alias pratiques, et tous les comportements.',
+    examples: [
+      { comment: 'Définir nom et email globalement', code: 'git config <span class="flag">--global</span> user.name <span class="arg">"Jean Dupont"</span>\ngit config <span class="flag">--global</span> user.email <span class="arg">"jean@mail.com"</span>' },
+      { comment: 'Définir VS Code comme éditeur par défaut', code: 'git config <span class="flag">--global</span> core.editor <span class="arg">"code --wait"</span>' },
+      { comment: 'Créer un alias pratique pour le log graphique', code: 'git config <span class="flag">--global</span> alias.lg <span class="arg">"log --oneline --graph --all"</span>' },
+      { comment: 'Afficher toute la configuration active', code: 'git config <span class="flag">--list</span>' },
+    ]
+  },
+  {
+    cmd: 'git ignore', category: 'config',
+    desc: 'Le fichier <code>.gitignore</code> indique à Git quels fichiers et dossiers ne jamais tracker.',
+    examples: [
+      { comment: 'Exemple de .gitignore typique pour Node.js', code: '<span class="comment-inline"># Dépendances Node.js</span>\nnode_modules/\n<span class="comment-inline"># Variables d\'environnement sensibles</span>\n.env\n<span class="comment-inline"># Dossiers de build</span>\ndist/\nbuild/\n<span class="comment-inline"># Fichiers système macOS</span>\n.DS_Store' },
+      { comment: 'Ignorer un fichier déjà tracké par Git', code: 'git rm <span class="flag">--cached</span> <span class="arg">.env</span>' },
+    ]
+  },
+  {
+    cmd: 'git hooks', category: 'config',
+    desc: 'Scripts automatiquement exécutés par Git lors d\'événements (avant commit, avant push, etc.).',
+    examples: [
+      { comment: 'Créer un hook pre-commit pour lancer le linter', code: 'cat > .git/hooks/pre-commit << \'EOF\'\n#!/bin/sh\nnpm run lint\nEOF\nchmod +x .git/hooks/pre-commit' },
+      { comment: 'Lister tous les hooks disponibles', code: 'ls .git/hooks/', output: 'pre-commit.sample\npre-push.sample\npost-merge.sample\ncommit-msg.sample' },
+    ]
+  },
+  {
+    cmd: 'git gc', category: 'config',
+    desc: 'Lance le garbage collector : supprime les objets inutiles et compresse le dépôt pour optimiser l\'espace.',
+    examples: [
+      { comment: 'Nettoyage standard automatique', code: 'git gc', output: 'Counting objects: 1543\nCompressing objects: 100% (890/890)' },
+      { comment: 'Nettoyage agressif (libère encore plus d\'espace)', code: 'git gc <span class="flag">--aggressive</span>' },
+    ]
+  },
+  {
+    cmd: 'git format-patch', category: 'config',
+    desc: 'Exporte des commits sous forme de fichiers .patch partageables par email ou applicables manuellement.',
+    examples: [
+      { comment: 'Générer les patches des 2 derniers commits', code: 'git format-patch <span class="arg">HEAD~2</span>' },
+      { comment: 'Appliquer un fichier patch reçu', code: 'git am <span class="arg">0001-feat-nouvelle-feature.patch</span>' },
+    ]
+  },
+];
+
+// ── CATEGORY CONFIG ──────────────────────────────
+const catColors = {
+  base:     { label: 'Base',       rgb: '247,201,72' },
+  branch:   { label: 'Branches',   rgb: '96,165,250' },
+  remote:   { label: 'Remote',     rgb: '255,107,53' },
+  history:  { label: 'Historique', rgb: '167,139,250' },
+  undo:     { label: 'Annuler',    rgb: '248,113,113' },
+  advanced: { label: 'Avancé',     rgb: '52,211,153'  },
+  config:   { label: 'Config',     rgb: '251,146,60'  },
+};
+
+let activeFilter = 'all';
+let acIndex = -1;
+
+// ── CARD BUILDER ─────────────────────────────────
+function buildCard(cmd, searchTerm = '') {
+  const cat = catColors[cmd.category] || catColors.base;
+
+  function hl(text) {
+    if (!searchTerm || !text) return text;
+    const re = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(re, '<mark>$1</mark>');
+  }
+
+  const examplesHTML = cmd.examples.map(ex => `
+    <div class="example-block">
+      <span class="example-comment">// ${ex.comment}</span>
+      <code class="example-code">${ex.code}</code>
+      ${ex.output ? `<div class="output-block"><span class="output-label">↳ sortie</span>${ex.output.replace(/\n/g, '<br>')}</div>` : ''}
+    </div>
+  `).join('');
+
+  return `
+    <div class="cmd-card" style="--cat-color: rgb(${cat.rgb})"
+         data-cmd="${cmd.cmd}" data-category="${cmd.category}">
+      <div class="cmd-header">
+        <div class="cmd-title">
+          <span class="git-prefix">git&nbsp;</span>${hl(cmd.cmd.replace('git ', ''))}
+        </div>
+        <span class="cmd-tag" style="background:rgba(${cat.rgb},0.12);color:rgb(${cat.rgb});border:1px solid rgba(${cat.rgb},0.25)">
+          ${cat.label}
+        </span>
+      </div>
+      <div class="cmd-body">
+        <p class="cmd-description">${hl(cmd.desc)}</p>
+        <div class="examples-label">Exemples</div>
+        ${examplesHTML}
+      </div>
+    </div>
+  `;
+}
+
+// ── RENDER ────────────────────────────────────────
+function renderCards(filter = 'all', searchTerm = '') {
+  const grid     = document.getElementById('grid');
+  const noRes    = document.getElementById('no-results');
+  const countEl  = document.getElementById('count');
+
+  const filtered = commands.filter(cmd => {
+    const matchCat = filter === 'all' || cmd.category === filter;
+    const t = searchTerm.toLowerCase();
+    const matchSearch = !t ||
+      cmd.cmd.toLowerCase().includes(t) ||
+      cmd.desc.replace(/<[^>]+>/g, '').toLowerCase().includes(t) ||
+      (cmd.examples||[]).some(e => e.comment.toLowerCase().includes(t));
+    return matchCat && matchSearch;
+  });
+
+  [...grid.querySelectorAll('.cmd-card')].forEach(el => el.remove());
+  noRes.classList.remove('visible');
+  countEl.textContent = filtered.length;
+
+  if (!filtered.length) { noRes.classList.add('visible'); return; }
+
+  filtered.forEach((cmd, i) => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = buildCard(cmd, searchTerm);
+    const card = wrap.firstElementChild;
+    card.style.animationDelay = `${Math.min(i * 0.025, 0.35)}s`;
+    grid.appendChild(card);
+  });
+}
+
+// ── AUTOCOMPLETE ──────────────────────────────────
+function buildAutocomplete(term) {
+  const list = document.getElementById('autocomplete');
+  if (!term) { list.classList.remove('visible'); return; }
+
+  const matches = commands.filter(cmd =>
+    cmd.cmd.toLowerCase().includes(term.toLowerCase()) ||
+    cmd.desc.replace(/<[^>]+>/g, '').toLowerCase().includes(term.toLowerCase())
+  ).slice(0, 7);
+
+  if (!matches.length) { list.classList.remove('visible'); return; }
+
+  list.innerHTML = matches.map((cmd, i) => {
+    const c = catColors[cmd.category] || catColors.base;
+    const cleanDesc = cmd.desc.replace(/<[^>]+>/g, '').substring(0, 52);
+    return `
+      <div class="ac-item" data-index="${i}" data-cmd="${cmd.cmd}">
+        <span class="ac-dot" style="background:rgb(${c.rgb})"></span>
+        <span class="ac-cmd">${cmd.cmd}</span>
+        <span class="ac-desc">${cleanDesc}…</span>
+        <span class="ac-category" style="background:rgba(${c.rgb},0.1);color:rgb(${c.rgb});border:1px solid rgba(${c.rgb},0.25)">${c.label}</span>
+      </div>
+    `;
+  }).join('') + `
+    <div class="ac-footer">
+      <span><span class="kbd">↑↓</span> naviguer</span>
+      <span><span class="kbd">↵</span> sélectionner</span>
+      <span><span class="kbd">Esc</span> fermer</span>
+    </div>`;
+
+  list.classList.add('visible');
+  acIndex = -1;
+
+  list.querySelectorAll('.ac-item').forEach(item => {
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectAcItem(item.dataset.cmd);
+    });
+  });
+}
+
+function selectAcItem(cmdStr) {
+  const keyword = cmdStr.replace('git ', '');
+  document.getElementById('search').value = keyword;
+  document.getElementById('autocomplete').classList.remove('visible');
+  renderCards('all', keyword);
+  setTimeout(() => {
+    const first = document.querySelector('.cmd-card');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 60);
+}
+
+// ── EVENT LISTENERS ───────────────────────────────
+const searchEl = document.getElementById('search');
+
+searchEl.addEventListener('input', e => {
+  const t = e.target.value.trim();
+  renderCards(activeFilter, t);
+  buildAutocomplete(t);
+});
+
+searchEl.addEventListener('keydown', e => {
+  const list  = document.getElementById('autocomplete');
+  const items = [...list.querySelectorAll('.ac-item')];
+  if (!list.classList.contains('visible') || !items.length) return;
+
+  if      (e.key === 'ArrowDown')             { e.preventDefault(); acIndex = Math.min(acIndex + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp')               { e.preventDefault(); acIndex = Math.max(acIndex - 1, -1); }
+  else if (e.key === 'Enter' && acIndex >= 0) { e.preventDefault(); selectAcItem(items[acIndex].dataset.cmd); return; }
+  else if (e.key === 'Escape')                { list.classList.remove('visible'); return; }
+
+  items.forEach((item, i) => item.classList.toggle('active', i === acIndex));
+});
+
+searchEl.addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('autocomplete').classList.remove('visible'), 180);
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderCards(activeFilter, searchEl.value.trim());
+  });
+});
+
+// ── THEME ─────────────────────────────────────────
+const themeBtn = document.getElementById('themeBtn');
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '🌙' : '☀️';
+  try { localStorage.setItem('git-theme', t); } catch(e) {}
+}
+
+themeBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  setTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// Restore saved theme
+try {
+  const saved = localStorage.getItem('git-theme');
+  if (saved === 'light') setTheme('light');
+} catch(e) {}
+
+// ── INIT ──────────────────────────────────────────
+renderCards();
+</script>
+</body>
+</html>
